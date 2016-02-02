@@ -49,11 +49,21 @@ chmod +x "$shell_script_file"
 
 #Cut out the recommended settings section from CSV output using perl
 # remove first 3 and last lines using sed
-# add column 2 (the recommended command) to the shell script file using cut
+# Add column 1 as comment and column 2 as command using perl
 cat powertop.csv | 
 	perl -wlne '/Software Settings in Need of Tuning/ .. /^____________________________________________________________________/ and print' |  
 	sed '1,3d;$d' | 
-	cut -d, -f2 >> "$shell_script_file"
+	perl -lne '
+	  if (/^(.*),(.*)$/) {
+	    $values{$1} = $2;
+	  }
+	  END {
+	    foreach $key (sort keys %values) {
+                print "#$key";
+                print "$values{$key}\n";
+                }
+            }
+	' >> "$shell_script_file"
 
 #Quick advice on how to make the recommended settings take effect
 echo "execute 'sudo "$shell_script_file"' to make powertop's recommended settings take effect"
