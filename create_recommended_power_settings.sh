@@ -21,11 +21,15 @@ IFS=$(printf '\n\t')  # IFS is only newline and tab
 # along with this program.  If not, see [http://www.gnu.org/licenses/].
 #-------------------------------------------------------------------------------
 
+#Text formatting codes
+BOLD=$(tput bold)
+NORMAL=$(tput sgr0)
+
 #The name of the created script file
-shell_script_file="apply_recommended_power_settings.sh"
+shell_script_file="./apply_recommended_power_settings.sh"
 
 #Create the powertop csv output, outputs to "powertop.csv" by default
-sudo powertop --csv
+sudo powertop --csv --time=1
 
 #Create the base shell script file to apply recommended settings
 # <<- lets the heredoc ignore leading tabs so we can indent here for clarity
@@ -38,7 +42,7 @@ cat <<- 'EOF' > "$shell_script_file"
 	#Quit if we aren't root
 	if [ ${UID} -ne 0 ]
 	then
-	    echo -e "Root privileges needed. Exit.\n\n"
+	    echo -e "Root privileges are needed to modify power settings\n"
 	    exit 1
 	fi
 
@@ -53,8 +57,9 @@ chmod +x "$shell_script_file"
 cat powertop.csv | 
 	perl -wlne '/Software Settings in Need of Tuning/ .. /^____________________________________________________________________/ and print' |  
 	sed '1,3d;$d' | 
-	perl -lne '
+	perl -wlne '
 	  if (/^(.*),(.*)$/) {
+            #The key is the comment, the value is the script
 	    $values{$1} = $2;
 	  }
 	  END {
@@ -66,4 +71,4 @@ cat powertop.csv |
 	' >> "$shell_script_file"
 
 #Quick advice on how to make the recommended settings take effect
-echo "execute 'sudo "$shell_script_file"' to make powertop's recommended settings take effect"
+echo "execute ${BOLD}sudo $shell_script_file${NORMAL} to make powertop's recommended settings take effect"
