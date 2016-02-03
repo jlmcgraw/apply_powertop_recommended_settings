@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -eu              # Abort on errors and unset variables
+set -eu               # Abort on errors and unset variables
 IFS=$(printf '\n\t')  # IFS is only newline and tab
 
 # Create a shell script to automatically apply powertop's recommened settings
