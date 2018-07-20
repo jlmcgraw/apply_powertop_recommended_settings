@@ -51,14 +51,15 @@ EOF
 # Make the new script executable
 chmod +x "$shell_script_file"
 
-# Cut out the recommended settings section from CSV output using perl
-# remove first 3 and last lines using sed
-# Add column 1 as comment and column 2 as command using perl
+# Cut out the "recommended settings" section from CSV output using perl
+# Remove first and last lines using sed
+# Add column 1 as comment and column 2 as command to output shell script
+#   using perl
 cat powertop.csv | 
-	perl -wlne '/Software Settings in Need of Tuning/ .. /^____________________________________________________________________/ and print' |  
-	sed '1,3d;$d' | 
+	perl -wlne '/^ Description [,;] Script/ix .. /^ [_]+ $/x and print' |  
+	sed '1d;$d' | 
 	perl -wlne '
-	  if (/ ^ (.*?) ; (.*?) ; $/x) {
+	  if (/ ^ (.*?) [,;] (.*?) [,;] $/x) {
             # The key is the comment, the value is the script
 	    $values{$1} = $2;
 	  }
